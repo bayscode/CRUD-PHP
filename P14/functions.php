@@ -57,7 +57,7 @@ function upload()
 
   // Cek apakah tidak ada gambar yang diupload
   if ($error === 4) {
-  ?>
+?>
     <script>
       alert('Pilih gambar terlebih dahulu');
     </script>
@@ -154,4 +154,44 @@ function cari($keyword)
             ";
 
   return query($query);
+}
+
+// Function Registrasi
+function registrasi($data)
+{
+  global $conn;
+
+  $username = strtolower(stripslashes($data['username']));
+  $password = mysqli_real_escape_string($conn, $data["password"]);
+  $password2 = mysqli_real_escape_string($conn, $data["password2"]);
+
+  // Cek username sudah ada atau belum
+  $result = mysqli_query($conn, "SELECT username FROM user WHERE username = '$username'");
+
+  if (mysqli_fetch_assoc($result)) {
+  ?>
+    <script>
+      alert('Username telah terdaftar!');
+    </script>
+  <?php
+    return false;
+  }
+
+  // Cek konfirmasi password
+  if ($password !== $password2) {
+  ?>
+    <script>
+      alert('Konfirmasi password tidak sesuai');
+    </script>
+<?php
+    return false;
+  }
+
+  // Enkripsi password
+  $password = password_hash($password, PASSWORD_DEFAULT);
+
+  // Tambahkan userbaru ke database
+  mysqli_query($conn, "INSERT INTO user VALUES ('','$username','$password')");
+
+  return mysqli_affected_rows($conn);
 }
